@@ -15,15 +15,14 @@ def calcLastFriDate(date):
     return lastFriDate
 
 
-def calc20WeekSma(date, stockData):
+def calcSma(date, stockData, numWeeks):
     sum = 0
     numReadingsLast20Weeks = 0
 
     # calcs date of prev friday
     lastFriDate = calcLastFriDate(date)
 
-    # iterate over last 20 values before this index in stockData
-    for i in range(0,20):
+    for i in range(0,numWeeks):
         friDate = lastFriDate - relativedelta(weeks=(1*i))
         price = stockData.loc[stockData.index == friDate.strftime("%Y-%m-%d"), 'Close']
         if price.values.size > 0:
@@ -39,13 +38,14 @@ def daterange(start_date, end_date):
 
 if __name__ == '__main__':
 
+    numWeeks = 30
     ticker = "^FTSE"
 
     endDate = datetime.today()
     startDate = datetime.today() - relativedelta(years=1)
 
     stockData = yf.download(
-        ticker , start=(startDate - relativedelta(weeks=20)).strftime("%Y-%m-%d"), end=endDate.strftime("%Y-%m-%d"), progress=False)
+        ticker , start=(startDate - relativedelta(weeks=numWeeks)).strftime("%Y-%m-%d"), end=endDate.strftime("%Y-%m-%d"), progress=False)
 
  
     x1 = []
@@ -63,12 +63,12 @@ if __name__ == '__main__':
             x1.append(singleDate)
             y1.append(stock.values[0])
             mAX.append(singleDate)
-            mAY.append(calc20WeekSma(singleDate, stockData))
+            mAY.append(calcSma(singleDate, stockData, numWeeks))
             
 
 
     plt.plot(x1, y1, label= ticker + " Stock Price")
-    plt.plot(mAX, mAY, label="20 Week MA")
+    plt.plot(mAX, mAY, label= str(numWeeks) + " Week MA")
 
     plt.xlabel('Date')
     plt.ylabel('Price ($)')
